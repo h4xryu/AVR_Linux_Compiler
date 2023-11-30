@@ -186,8 +186,6 @@ void MainWindow::fillPortsInfo()
     }
 
     ui->baudrateBox->addItem("57600");
-    ui->baudrateBox->addItem("115200");
-    ui->baudrateBox->addItem("230400");
 }
 
 void MainWindow::handleError(QSerialPort::SerialPortError error)
@@ -209,6 +207,7 @@ void MainWindow::on_btnFlash_clicked(){
 
 void MainWindow::on_btnCompile_clicked(){
     ui->textBrowser->clear();
+    fillPortsInfo();
     c_file = QFileDialog::getOpenFileName(this, "Select a C file", "./","*.c");
 
 
