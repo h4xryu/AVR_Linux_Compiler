@@ -199,9 +199,13 @@ void MainWindow::on_btnFlash_clicked(){
     ui->textBrowser->append("Uploading Firmware...");
     command = "avrdude";
     arguments.clear();
-    arguments << ("-p"+flashType).c_str() << ("-P/dev/"+ui->comboBox->currentText().toStdString()).c_str() <<("-c"+boardName).c_str() << "-U" << ("flash:w:"+fileName+".flash.hex:i").c_str();
+    QString arg = ("-p "+avrType+" -P /dev/"+ui->comboBox->currentText().toStdString()+" -c "+boardName+" -U flash:w:"+fileName+".flash.hex:i").c_str();
+    arguments << arg.split(" ");
+
     flashCommand(command, arguments);
+
     arguments.clear();
+
 
 }
 
@@ -242,13 +246,18 @@ void MainWindow::on_btnCompile_clicked(){
         fileName = currentPath+"/"+onlyName;
         openConsole(currentPath);
         command = "avr-gcc";
-        QString arg = ("-g -DF_CPU=160000 -Wall -Os -Wextra -mmcu="+avrType+" -Wa,-ahlmns="+fileName+".lst -c -o "+fileName+".o"+" "+fileName+".c").c_str();
+        QString arg = ("-g -DF_CPU=1600000 -Wall -Os -Wextra -mmcu="+avrType+" -Wa,-ahlmns="+fileName+".lst -c -o "+fileName+".o"+" "+fileName+".c").c_str();
         arguments.clear();
         arguments << arg.split(" ");
         consoleCommand(command,arguments);
 
         arguments.clear();
-        arg = ("-g -DF_CPU=160000 -Wall -Os -Wextra -mmcu="+avrType+" -o "+fileName+".elf"+" "+fileName+".o").c_str();
+        arg = ("-g -DF_CPU=1600000 -Wall -Os -Wextra -mmcu="+avrType+" -o "+fileName+".elf"+" "+fileName+".o").c_str();
+        arguments << arg.split(" ");
+        noprintCommand(command,arguments);
+
+        arguments.clear();
+        arg = ("-g -DF_CPU=1600000 -Wall -Os -Wextra -mmcu="+avrType+"-b "+ui->baudrateBox->currentText().toStdString()+"-v -U eeprom:w:"+fileName+"eeprom.hex").c_str();
         arguments << arg.split(" ");
         noprintCommand(command,arguments);
 
@@ -263,16 +272,21 @@ void MainWindow::on_btnCompile_clicked(){
         arg = ("-j .text -j .data -O ihex "+fileName+".elf"+" "+fileName+".flash.hex").c_str();
         arguments << arg.split(" ");
         consoleCommand(command,arguments);
-        std::system(("avr-objcopy -j .text -j .data -O ihex "+fileName+".elf "+fileName+".flash.hex").c_str());
+        std::system(("avr-objcopy -j .text -j .data -O ihex "+fileName+".elf"+" "+fileName+".flash.hex").c_str());
+
+
         arguments.clear();
-        arg = ("-j .text -j .eeprom --set-section-flags=.eeprom=alloc,load --change-section-lma .eeprom=0 -O ihex "+fileName+".elf "+fileName+".eeprom.hex").c_str();
+        arg = ("-j .eeprom --set-section-flags=.eeprom=alloc,load --change-section-lma .eeprom=0 -O ihex "+fileName+".elf "+fileName+".eeprom.hex").c_str();
         arguments << arg.split(" ");
         flashCommand(command,arguments);
-        //std::system(("avr-objcopy -j .eeprom --set-section-flags=.eeprom="alloc,load" --change-section-lma .eeprom=0 -O ihex "+fileName+".elf "+fileName+".eeprom.hex").c_str());
+        std::system(("avr-objcopy -j .eeprom --set-section-flags=.eeprom=alloc,load --change-section-lma .eeprom=0 -O ihex "+fileName+".elf "+fileName+".eeprom.hex").c_str());
+
         arguments.clear();
-        arg = ("avr-objcopy -j .fuse -O ihex "+fileName+".elf "+fileName+".fuses.hex --change-section-lma .fuse=0").c_str();
+        arg = (" -j .fuse -O ihex "+fileName+".elf "+fileName+".fuses.hex --change-section-lma .fuse=0").c_str();
         arguments << arg.split(" ");
         noprintCommand(command,arguments);
+        std::system(("avr-objcopy -j .fuse -O ihex "+fileName+".elf "+fileName+".fuses.hex --change-section-lma .fuse=0").c_str());
+
         ui->btnFlash->setEnabled(true);
         ui->btnFlash->setStyleSheet("color: #FFFFFF;");
     }
