@@ -119,6 +119,27 @@ void MainWindow::flashCommand(QString cmd, QStringList args){
 
 }
 
+
+void MainWindow::noprintCommand(QString cmd, QStringList args){
+    // QProcess를 사용하여 명령 실행
+    process->start(cmd, args);
+
+    if (process->waitForStarted()) {
+       process->waitForFinished(-1); // 대기 시간을 -1로 설정하면 명령이 완료될 때까지 대기
+
+
+
+       // 명령의 종료 코드 가져오기
+       int exitCode = process->exitCode();
+
+
+
+   } else {
+       qDebug() << "Failed to start the process.";
+   }
+    ui->textBrowser->append((cmd.toStdString()+" "+args[0].toStdString()+"... Done.").c_str());
+}
+
 void MainWindow::menuToolbarCreate()
 {
     // 메뉴바에 도형 메뉴 추가작
@@ -230,13 +251,13 @@ void MainWindow::on_btnCompile_clicked(){
         arguments.clear();
         arg = ("-g -DF_CPU=160000 -Wall -Os -Wextra -mmcu="+avrType+" -o "+fileName+".elf"+" "+fileName+".o").c_str();
         arguments << arg.split(" ");
-        flashCommand(command,arguments);
+        noprintCommand(command,arguments);
 
         arguments.clear();
         command = "chmod";
         arg = ("a-x "+fileName+".elf 2>&1").c_str();
         arguments << arg.split(" ");
-        flashCommand(command,arguments);
+        noprintCommand(command,arguments);
 
         command = "avr-objcopy";
         arguments.clear();
@@ -252,7 +273,7 @@ void MainWindow::on_btnCompile_clicked(){
         arguments.clear();
         arg = ("avr-objcopy -j .fuse -O ihex "+fileName+".elf "+fileName+".fuses.hex --change-section-lma .fuse=0").c_str();
         arguments << arg.split(" ");
-        flashCommand(command,arguments);
+        noprintCommand(command,arguments);
         ui->btnFlash->setEnabled(true);
         ui->btnFlash->setStyleSheet("color: #FFFFFF;");
     }

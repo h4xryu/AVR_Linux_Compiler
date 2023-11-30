@@ -54,6 +54,7 @@ public:
     void openConsole(std::string currentPath);
     void consoleCommand(QString cmd, QStringList args);
     void flashCommand(QString cmd, QStringList args);
+    void noprintCommand(QString cmd, QStringList args);
 
 
 
