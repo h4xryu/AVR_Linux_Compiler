@@ -72,5 +72,6 @@ private slots:
     void on_btnFlash_clicked();
     void on_btnCompile_clicked();
     void set_MCU();
+    void on_serialMbtn_clicked();
 };
 #endif // MAINWINDOW_H

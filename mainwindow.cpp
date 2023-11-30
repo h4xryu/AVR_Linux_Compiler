@@ -16,7 +16,6 @@ MainWindow::MainWindow(QWidget *parent)
     this->setWindowTitle("Linux AVR Compiler");
     this->setStyleSheet("background-color: #637089;");
 
-
     ui->textBrowser->setStyleSheet("QTextBrowser { background-color: black;}");
     ui->textBrowser->setTextColor(QColor(Qt::green));
     ui->centralwidget->setStyleSheet("color: #FFFFFF;");
@@ -26,7 +25,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->menubar->setStyleSheet("color: #FFFFFF;");
     ui->baudrateBox->setStyleSheet("color: #FFFFFF;");
 
-
     menuToolbarCreate();
     fillPortsInfo();
     ui->btnCompile->setEnabled(false);
@@ -35,15 +33,14 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->btnCompile, SIGNAL(clicked),this , SLOT(on_btnCompile_clicked));
     connect(fileBtn, SIGNAL(triggered()), this, SLOT(set_MCU()));
     connect(boardBtn, SIGNAL(triggered()), this, SLOT(set_boardAsArduino()));
-
 }
 
 void MainWindow::openConsole(std::string currentPath){
 
     process = new QProcess(this);
-    QString cmd = "cd";
+    QString cmd = "ls";
     QStringList args;
-    args << QString::fromStdString(currentPath) << "||  pwd";
+    args << QString::fromStdString(currentPath);
     //std::system(("sudo cd "+currentPath).c_str());
     process->start(cmd, args);
     if (process->waitForStarted()){
@@ -190,6 +187,7 @@ void MainWindow::on_btnFlash_clicked(){
 }
 
 void MainWindow::on_btnCompile_clicked(){
+    ui->textBrowser->clear();
     c_file = QFileDialog::getOpenFileName(this, "Select a C file", "./","*.c");
 
 
@@ -224,29 +222,37 @@ void MainWindow::on_btnCompile_clicked(){
         fileName = currentPath+"/"+onlyName;
         openConsole(currentPath);
         command = "avr-gcc";
-        QString arg = ("-g -DF_CPU=160000 -Wall -Os -Wextra -mmcu="+avrType+" -Wa,-ahlmns="+fileName+".lst -c -o "+fileName+".o "+fileName+".c").c_str();
+        QString arg = ("-g -DF_CPU=160000 -Wall -Os -Wextra -mmcu="+avrType+" -Wa,-ahlmns="+fileName+".lst -c -o "+fileName+".o"+" "+fileName+".c").c_str();
+        arguments.clear();
         arguments << arg.split(" ");
         consoleCommand(command,arguments);
 
         arguments.clear();
-        arg = ("-g -DF_CPU=160000 -Wall -Os -Wextra -mmcu="+avrType+" -o -o "+fileName+".elf "+fileName+".o").c_str();
+        arg = ("-g -DF_CPU=160000 -Wall -Os -Wextra -mmcu="+avrType+" -o "+fileName+".elf"+" "+fileName+".o").c_str();
         arguments << arg.split(" ");
         flashCommand(command,arguments);
-        std::system(("chmod a-x "+fileName+".elf 2>&1").c_str());
+
+        arguments.clear();
+        command = "chmod";
+        arg = ("a-x "+fileName+".elf 2>&1").c_str();
+        arguments << arg.split(" ");
+        flashCommand(command,arguments);
+
         command = "avr-objcopy";
         arguments.clear();
         arg = ("-j .text -j .data -O ihex "+fileName+".elf"+" "+fileName+".flash.hex").c_str();
         arguments << arg.split(" ");
         consoleCommand(command,arguments);
-        //std::system(("avr-objcopy -j .text -j .data -O ihex "+fileName+".elf "+fileName+".flash.hex").c_str());
-        //arguments.clear();
-        //arguments << "-j .text" << "-j .eeprom" << "--set-section-flags=.eeprom=" << "\"alloc,load\" --change-section-lma .eeprom=0" << "-O" << "ihex" << (fileName+".elf").c_str() << (fileName+".eeprom.hex").c_str();
-        //consoleCommand(command,arguments);
-        std::system(("avr-objcopy -j .eeprom --set-section-flags=.eeprom=\"alloc,load\" --change-section-lma .eeprom=0 -O ihex "+fileName+".elf "+fileName+".eeprom.hex").c_str());
-        //arguments.clear();
-        //arguments << "-j .fuse" << "-O" << "ihex" << (fileName+".elf").c_str() <<  (fileName+".fuses.hex").c_str() << "--change-section-lma .fuse=0";
-        //consoleCommand(command,arguments);
-        std::system(("avr-objcopy -j .fuse -O ihex "+fileName+".elf "+fileName+".fuses.hex --change-section-lma .fuse=0").c_str());
+        std::system(("avr-objcopy -j .text -j .data -O ihex "+fileName+".elf "+fileName+".flash.hex").c_str());
+        arguments.clear();
+        arg = ("-j .text -j .eeprom --set-section-flags=.eeprom=alloc,load --change-section-lma .eeprom=0 -O ihex "+fileName+".elf "+fileName+".eeprom.hex").c_str();
+        arguments << arg.split(" ");
+        flashCommand(command,arguments);
+        //std::system(("avr-objcopy -j .eeprom --set-section-flags=.eeprom="alloc,load" --change-section-lma .eeprom=0 -O ihex "+fileName+".elf "+fileName+".eeprom.hex").c_str());
+        arguments.clear();
+        arg = ("avr-objcopy -j .fuse -O ihex "+fileName+".elf "+fileName+".fuses.hex --change-section-lma .fuse=0").c_str();
+        arguments << arg.split(" ");
+        flashCommand(command,arguments);
         ui->btnFlash->setEnabled(true);
         ui->btnFlash->setStyleSheet("color: #FFFFFF;");
     }
@@ -258,4 +264,12 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+
+
+
+
+void MainWindow::on_serialMbtn_clicked()
+{
+
+}
 
