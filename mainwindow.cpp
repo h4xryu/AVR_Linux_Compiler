@@ -15,7 +15,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     this->setWindowTitle("Linux AVR Compiler");
     this->setStyleSheet("background-color: #637089;");
-
+    this->setWindowIcon(QIcon("/home/student/avr_linux_compiler/avr.png"));
     ui->textBrowser->setStyleSheet("QTextBrowser { background-color: black;}");
     ui->textBrowser->setTextColor(QColor(Qt::green));
     ui->centralwidget->setStyleSheet("color: #FFFFFF;");
