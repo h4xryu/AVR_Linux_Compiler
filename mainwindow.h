@@ -39,6 +39,8 @@ public:
     QAction *openBtn;
     QString c_file;
     std::string avrType;
+    std::string flashType;
+    std::string onlyName;
     std::string boardName;
     std::string currentPath;
     int MCU_set_flag = 0;

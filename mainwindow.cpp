@@ -41,9 +41,9 @@ MainWindow::MainWindow(QWidget *parent)
 void MainWindow::openConsole(std::string currentPath){
 
     process = new QProcess(this);
-    QString cmd = "touch";
+    QString cmd = "cd";
     QStringList args;
-    args << QString::fromStdString(currentPath);
+    args << QString::fromStdString(currentPath) << "||  pwd";
     //std::system(("sudo cd "+currentPath).c_str());
     process->start(cmd, args);
     if (process->waitForStarted()){
@@ -53,8 +53,12 @@ void MainWindow::openConsole(std::string currentPath){
 
         // 명령의 표준 에러 가져오기
         QByteArray error = process->readAllStandardError();
+        ui->textBrowser->setTextColor(QColor(Qt::green));
         ui->textBrowser->append(result);
+        ui->textBrowser->setTextColor(QColor(Qt::red));
         ui->textBrowser->append(error);
+        ui->textBrowser->setTextColor(QColor(Qt::green));
+
         process->exitCode();
     }
 }
@@ -71,9 +75,13 @@ void MainWindow::consoleCommand(QString cmd, QStringList args){
 
        // 명령의 표준 에러 가져오기
        QByteArray error = process->readAllStandardError();
-
+\
+       ui->textBrowser->setTextColor(QColor(Qt::green));
        ui->textBrowser->append(result);
+       ui->textBrowser->setTextColor(QColor(Qt::red));
        ui->textBrowser->append(error);
+       ui->textBrowser->setTextColor(QColor(Qt::green));
+
        // 명령의 종료 코드 가져오기
        int exitCode = process->exitCode();
 
@@ -82,8 +90,37 @@ void MainWindow::consoleCommand(QString cmd, QStringList args){
    } else {
        qDebug() << "Failed to start the process.";
    }
+
+    ui->textBrowser->append((cmd.toStdString()+" "+args[0].toStdString()+"... Done.").c_str());
 }
 
+void MainWindow::flashCommand(QString cmd, QStringList args){
+    // QProcess를 사용하여 명령 실행
+    process->start(cmd, args);
+
+    if (process->waitForStarted()) {
+       process->waitForFinished(-1); // 대기 시간을 -1로 설정하면 명령이 완료될 때까지 대기
+
+       // 명령의 표준 출력 가져오기
+       QByteArray result = process->readAllStandardOutput();
+
+       // 명령의 표준 에러 가져오기
+       QByteArray error = process->readAllStandardError();
+\
+       ui->textBrowser->setTextColor(QColor(Qt::green));
+       ui->textBrowser->append(result);
+       ui->textBrowser->append(error);
+
+       // 명령의 종료 코드 가져오기
+       int exitCode = process->exitCode();
+
+
+
+   } else {
+       qDebug() << "Failed to start the process.";
+   }
+
+}
 
 void MainWindow::menuToolbarCreate()
 {
@@ -109,6 +146,7 @@ void MainWindow::set_MCU(){
         ui->btnCompile->setStyleSheet("color: #FFFFFF;");
     }
     avrType = "atmega328p";
+    flashType = "m328p";
 }
 
 void MainWindow::set_boardAsArduino(){
@@ -117,7 +155,7 @@ void MainWindow::set_boardAsArduino(){
         ui->btnCompile->setEnabled(true);
         ui->btnCompile->setStyleSheet("color: #FFFFFF;");
     }
-    boardName = "arduino";
+    boardName = "Arduino";
 }
 
 void MainWindow::fillPortsInfo()
@@ -145,10 +183,9 @@ void MainWindow::on_btnFlash_clicked(){
     ui->textBrowser->append("Uploading Firmware...");
     command = "avrdude";
     arguments.clear();
-    arguments << ("-p"+avrType).c_str() << ("-P/dev/"+ui->comboBox->currentText().toStdString()).c_str() <<("-c"+boardName).c_str() << ("-U flash:w:"+fileName+".flash.hex:i").c_str();
-    consoleCommand(command, arguments);
-
-
+    arguments << ("-p"+flashType).c_str() << ("-P/dev/"+ui->comboBox->currentText().toStdString()).c_str() <<("-c"+boardName).c_str() << "-U" << ("flash:w:"+fileName+".flash.hex:i").c_str();
+    flashCommand(command, arguments);
+    arguments.clear();
 
 }
 
@@ -175,7 +212,7 @@ void MainWindow::on_btnCompile_clicked(){
             extracted_fileName.push_back(extracted_tmp[i]);
         }
 
-        std::string onlyName = extracted_fileName;
+        onlyName = extracted_fileName;
 
 
         while(1){
@@ -187,15 +224,28 @@ void MainWindow::on_btnCompile_clicked(){
         fileName = currentPath+"/"+onlyName;
         openConsole(currentPath);
         command = "avr-gcc";
-        arguments;
-        arguments << "-g" << "-DF_CPU=160000" << "-Wall" << "-Os" << "-Wextra" << ("-mmcu="+avrType).c_str() << ("-Wa,-ahlmns="+fileName+".lst").c_str() << "-c" << ("-o "+onlyName+".o ").c_str() << (fileName+".c").c_str();
+        QString arg = ("-g -DF_CPU=160000 -Wall -Os -Wextra -mmcu="+avrType+" -Wa,-ahlmns="+fileName+".lst -c -o "+fileName+".o "+fileName+".c").c_str();
+        arguments << arg.split(" ");
         consoleCommand(command,arguments);
+
         arguments.clear();
-        arguments << "-g" << "-DF_CPU=160000" << "-Wall" << "-Os" << "-Wextra" << ("-mmcu="+avrType).c_str() << "-o" << ("-o "+onlyName+".elf ").c_str() << (fileName+".o").c_str();
-        consoleCommand(command,arguments);
+        arg = ("-g -DF_CPU=160000 -Wall -Os -Wextra -mmcu="+avrType+" -o -o "+fileName+".elf "+fileName+".o").c_str();
+        arguments << arg.split(" ");
+        flashCommand(command,arguments);
         std::system(("chmod a-x "+fileName+".elf 2>&1").c_str());
-        std::system(("avr-objcopy -j .text -j .data -O ihex "+fileName+".elf "+fileName+".flash.hex").c_str());
+        command = "avr-objcopy";
+        arguments.clear();
+        arg = ("-j .text -j .data -O ihex "+fileName+".elf"+" "+fileName+".flash.hex").c_str();
+        arguments << arg.split(" ");
+        consoleCommand(command,arguments);
+        //std::system(("avr-objcopy -j .text -j .data -O ihex "+fileName+".elf "+fileName+".flash.hex").c_str());
+        //arguments.clear();
+        //arguments << "-j .text" << "-j .eeprom" << "--set-section-flags=.eeprom=" << "\"alloc,load\" --change-section-lma .eeprom=0" << "-O" << "ihex" << (fileName+".elf").c_str() << (fileName+".eeprom.hex").c_str();
+        //consoleCommand(command,arguments);
         std::system(("avr-objcopy -j .eeprom --set-section-flags=.eeprom=\"alloc,load\" --change-section-lma .eeprom=0 -O ihex "+fileName+".elf "+fileName+".eeprom.hex").c_str());
+        //arguments.clear();
+        //arguments << "-j .fuse" << "-O" << "ihex" << (fileName+".elf").c_str() <<  (fileName+".fuses.hex").c_str() << "--change-section-lma .fuse=0";
+        //consoleCommand(command,arguments);
         std::system(("avr-objcopy -j .fuse -O ihex "+fileName+".elf "+fileName+".fuses.hex --change-section-lma .fuse=0").c_str());
         ui->btnFlash->setEnabled(true);
         ui->btnFlash->setStyleSheet("color: #FFFFFF;");
