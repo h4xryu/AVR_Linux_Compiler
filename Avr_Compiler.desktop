@@ -1,9 +1,0 @@
-
-[Desktop Entry]
-Version=1.0
-Type=Application
-Terminal=false
-Exec=./avr_linux_compiler.sh
-Name=avr_linux_compiler
-Comment=avr_linux_compiler
-Icon=/home/student/avr.ico

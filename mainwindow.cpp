@@ -247,27 +247,40 @@ void MainWindow::on_btnCompile_clicked(){
 
         fileName = currentPath+"/"+onlyName;
         openConsole(currentPath);
-        command = "avr-gcc";
-        QString arg = ("-g -DF_CPU="+cpu_clock+" -Wall -Os -Wextra -mmcu="+avrType+" -Wa,-ahlmns="+fileName+".lst -c -o "+fileName+".o"+" "+fileName+".c").c_str();
+
+
+
+        command = "rm";
+        QString arg = (fileName+".elf "+fileName+".eeprom.hex "+fileName+"fuses.hex "+fileName+".flash.hex "+fileName+".o").c_str();
         arguments.clear();
         arguments << arg.split(" ");
         consoleCommand(command,arguments);
+
+
+        command = "avr-gcc";
+        arg = ("-g -DF_CPU="+cpu_clock+" -Wall -Os -Wextra -mmcu="+avrType+" -Wa,-ahlmns="+fileName+".lst -c -o "+fileName+".o"+" "+fileName+".c").c_str();
+        arguments.clear();
+        arguments << arg.split(" ");
+        consoleCommand(command,arguments);
+
 
         arguments.clear();
         arg = ("-g -DF_CPU="+cpu_clock+" -Wall -Os -Wextra -mmcu="+avrType+" -o "+fileName+".elf"+" "+fileName+".o").c_str();
         arguments << arg.split(" ");
         noprintCommand(command,arguments);
 
-        arguments.clear();
-        arg = ("-g -DF_CPU="+cpu_clock+" -Wall -Os -Wextra -mmcu="+avrType+"-b "+ui->baudrateBox->currentText().toStdString()+"-v -U eeprom:w:"+fileName+"eeprom.hex").c_str();
-        arguments << arg.split(" ");
-        noprintCommand(command,arguments);
 
         arguments.clear();
         command = "chmod";
         arg = ("a-x "+fileName+".elf 2>&1").c_str();
         arguments << arg.split(" ");
         noprintCommand(command,arguments);
+
+        arguments.clear();
+        arg = ("-g -DF_CPU="+cpu_clock+" -Wall -Os -Wextra -mmcu="+avrType+" -b "+ui->baudrateBox->currentText().toStdString()+" -v -U eeprom:w:"+fileName+"eeprom.hex").c_str();
+        arguments << arg.split(" ");
+        noprintCommand(command,arguments);
+
 
         command = "avr-objcopy";
         arguments.clear();
@@ -280,8 +293,8 @@ void MainWindow::on_btnCompile_clicked(){
         arguments.clear();
         arg = ("-j .eeprom --set-section-flags=.eeprom=alloc,load --change-section-lma .eeprom=0 -O ihex "+fileName+".elf "+fileName+".eeprom.hex").c_str();
         arguments << arg.split(" ");
-        //flashCommand(command,arguments);
-        std::system(("avr-objcopy -j .eeprom --set-section-flags=.eeprom=\"alloc,load\" --change-section-lma .eeprom=0 -O ihex "+fileName+".elf "+fileName+".eeprom.hex").c_str());
+        flashCommand(command,arguments);
+        std::system(("avr-objcopy -j .eeprom --set-section-flags=.eeprom=alloc,load --change-section-lma .eeprom=0 -O ihex "+fileName+".elf "+fileName+".eeprom.hex").c_str());
 
         arguments.clear();
         arg = (" -j .fuse -O ihex "+fileName+".elf "+fileName+".fuses.hex --change-section-lma .fuse=0").c_str();
