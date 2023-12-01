@@ -142,6 +142,7 @@ void MainWindow::noprintCommand(QString cmd, QStringList args){
 
 void MainWindow::menuToolbarCreate()
 {
+
     // 메뉴바에 도형 메뉴 추가작
         pGraphMenu = menuBar()->addMenu(tr("&Select Board"));
         ToolBar = addToolBar(tr("Select Board"));
@@ -273,20 +274,20 @@ void MainWindow::on_btnCompile_clicked(){
         arg = ("-j .text -j .data -O ihex "+fileName+".elf"+" "+fileName+".flash.hex").c_str();
         arguments << arg.split(" ");
         consoleCommand(command,arguments);
-        std::system(("avr-objcopy -j .text -j .data -O ihex "+fileName+".elf"+" "+fileName+".flash.hex").c_str());
+        //std::system(("avr-objcopy -j .text -j .data -O ihex "+fileName+".elf"+" "+fileName+".flash.hex").c_str());
 
 
         arguments.clear();
         arg = ("-j .eeprom --set-section-flags=.eeprom=alloc,load --change-section-lma .eeprom=0 -O ihex "+fileName+".elf "+fileName+".eeprom.hex").c_str();
         arguments << arg.split(" ");
-        flashCommand(command,arguments);
-        std::system(("avr-objcopy -j .eeprom --set-section-flags=.eeprom=alloc,load --change-section-lma .eeprom=0 -O ihex "+fileName+".elf "+fileName+".eeprom.hex").c_str());
+        //flashCommand(command,arguments);
+        std::system(("avr-objcopy -j .eeprom --set-section-flags=.eeprom=\"alloc,load\" --change-section-lma .eeprom=0 -O ihex "+fileName+".elf "+fileName+".eeprom.hex").c_str());
 
         arguments.clear();
         arg = (" -j .fuse -O ihex "+fileName+".elf "+fileName+".fuses.hex --change-section-lma .fuse=0").c_str();
         arguments << arg.split(" ");
         noprintCommand(command,arguments);
-        std::system(("avr-objcopy -j .fuse -O ihex "+fileName+".elf "+fileName+".fuses.hex --change-section-lma .fuse=0").c_str());
+        //std::system(("avr-objcopy -j .fuse -O ihex "+fileName+".elf "+fileName+".fuses.hex --change-section-lma .fuse=0").c_str());
 
         ui->btnFlash->setEnabled(true);
         ui->btnFlash->setStyleSheet("color: #FFFFFF;");

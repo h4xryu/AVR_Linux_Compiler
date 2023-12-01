@@ -37,28 +37,28 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QString::fromUtf8("MainWindow"));
-        MainWindow->resize(492, 440);
+        MainWindow->resize(494, 629);
         centralwidget = new QWidget(MainWindow);
         centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
         btnFlash = new QPushButton(centralwidget);
         btnFlash->setObjectName(QString::fromUtf8("btnFlash"));
-        btnFlash->setGeometry(QRect(270, 340, 51, 21));
+        btnFlash->setGeometry(QRect(270, 500, 51, 21));
         comboBox = new QComboBox(centralwidget);
         comboBox->setObjectName(QString::fromUtf8("comboBox"));
-        comboBox->setGeometry(QRect(10, 340, 81, 21));
+        comboBox->setGeometry(QRect(10, 500, 81, 21));
         baudrateBox = new QComboBox(centralwidget);
         baudrateBox->setObjectName(QString::fromUtf8("baudrateBox"));
-        baudrateBox->setGeometry(QRect(100, 340, 81, 21));
+        baudrateBox->setGeometry(QRect(100, 500, 81, 21));
         btnCompile = new QPushButton(centralwidget);
         btnCompile->setObjectName(QString::fromUtf8("btnCompile"));
-        btnCompile->setGeometry(QRect(190, 340, 71, 21));
+        btnCompile->setGeometry(QRect(190, 500, 71, 21));
         textBrowser = new QTextBrowser(centralwidget);
         textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
-        textBrowser->setGeometry(QRect(10, 10, 471, 311));
+        textBrowser->setGeometry(QRect(10, 10, 471, 481));
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QString::fromUtf8("menubar"));
-        menubar->setGeometry(QRect(0, 0, 492, 22));
+        menubar->setGeometry(QRect(0, 0, 494, 22));
         MainWindow->setMenuBar(menubar);
         statusbar = new QStatusBar(MainWindow);
         statusbar->setObjectName(QString::fromUtf8("statusbar"));
