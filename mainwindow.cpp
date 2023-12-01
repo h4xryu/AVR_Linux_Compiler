@@ -174,6 +174,7 @@ void MainWindow::set_boardAsArduino(){
         ui->btnCompile->setStyleSheet("color: #FFFFFF;");
     }
     boardName = "Arduino";
+    cpu_clock = "16000000";
 }
 
 void MainWindow::fillPortsInfo()
@@ -246,18 +247,18 @@ void MainWindow::on_btnCompile_clicked(){
         fileName = currentPath+"/"+onlyName;
         openConsole(currentPath);
         command = "avr-gcc";
-        QString arg = ("-g -DF_CPU=1600000 -Wall -Os -Wextra -mmcu="+avrType+" -Wa,-ahlmns="+fileName+".lst -c -o "+fileName+".o"+" "+fileName+".c").c_str();
+        QString arg = ("-g -DF_CPU="+cpu_clock+" -Wall -Os -Wextra -mmcu="+avrType+" -Wa,-ahlmns="+fileName+".lst -c -o "+fileName+".o"+" "+fileName+".c").c_str();
         arguments.clear();
         arguments << arg.split(" ");
         consoleCommand(command,arguments);
 
         arguments.clear();
-        arg = ("-g -DF_CPU=1600000 -Wall -Os -Wextra -mmcu="+avrType+" -o "+fileName+".elf"+" "+fileName+".o").c_str();
+        arg = ("-g -DF_CPU="+cpu_clock+" -Wall -Os -Wextra -mmcu="+avrType+" -o "+fileName+".elf"+" "+fileName+".o").c_str();
         arguments << arg.split(" ");
         noprintCommand(command,arguments);
 
         arguments.clear();
-        arg = ("-g -DF_CPU=1600000 -Wall -Os -Wextra -mmcu="+avrType+"-b "+ui->baudrateBox->currentText().toStdString()+"-v -U eeprom:w:"+fileName+"eeprom.hex").c_str();
+        arg = ("-g -DF_CPU="+cpu_clock+" -Wall -Os -Wextra -mmcu="+avrType+"-b "+ui->baudrateBox->currentText().toStdString()+"-v -U eeprom:w:"+fileName+"eeprom.hex").c_str();
         arguments << arg.split(" ");
         noprintCommand(command,arguments);
 

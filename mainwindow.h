@@ -43,6 +43,7 @@ public:
     std::string onlyName;
     std::string boardName;
     std::string currentPath;
+    std::string cpu_clock;
     int MCU_set_flag = 0;
     int board_set_flag = 0;
     QProcess *process;
