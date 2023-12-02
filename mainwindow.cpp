@@ -252,6 +252,9 @@ void MainWindow::fillPortsInfo()
     }
 
     ui->baudrateBox->addItem("57600");
+    ui->baudrateBox->addItem("9600");
+    ui->baudrateBox->addItem("115200");
+
 }
 
 void MainWindow::handleError(QSerialPort::SerialPortError error)
