@@ -29,10 +29,16 @@ MainWindow::MainWindow(QWidget *parent)
     fillPortsInfo();
     ui->btnCompile->setEnabled(false);
     ui->btnFlash->setEnabled(false);
+    boardBtn->setEnabled(false);
+    tinyISPBtn->setEnabled(false);
+    usb2ttlBtn->setEnabled(false);
     connect(ui->btnFlash, SIGNAL(clicked),this, SLOT(on_btnFlash_clicked));
     connect(ui->btnCompile, SIGNAL(clicked),this , SLOT(on_btnCompile_clicked));
     connect(fileBtn, SIGNAL(triggered()), this, SLOT(set_MCU()));
+
     connect(boardBtn, SIGNAL(triggered()), this, SLOT(set_boardAsArduino()));
+    connect(tinyISPBtn, SIGNAL(triggered()), this, SLOT(set_USBtinyISP()));
+    connect(usb2ttlBtn, SIGNAL(triggered()), this, SLOT(set_USB2TTL()));
 }
 
 void MainWindow::openConsole(std::string currentPath){
@@ -149,11 +155,16 @@ void MainWindow::menuToolbarCreate()
         ToolBar->setStyleSheet("color: #FFFFFF;");
         // 아이콘 설정
         fileBtn = new QAction(tr("&atmega328p"), this);
-        boardBtn = new QAction(tr("&arduino"), this);
-
+        stm32Btn = new QAction(tr("&STM32"), this);
+        boardBtn = new QAction(tr("&Arduino"), this);
+        tinyISPBtn = new QAction(tr("&USBtinyISP"), this);
+        usb2ttlBtn = new QAction(tr("&USB2TTL"), this);
         // 메뉴바에 "그래프 시작 추가
         pGraphMenu->addAction(fileBtn);
+        pGraphMenu->addAction(stm32Btn);
         ToolBar->addAction(boardBtn);
+        ToolBar->addAction(tinyISPBtn);
+        ToolBar->addAction(usb2ttlBtn);
 
 }
 
@@ -164,12 +175,47 @@ void MainWindow::set_MCU(){
         ui->btnCompile->setEnabled(true);
         ui->btnCompile->setStyleSheet("color: #FFFFFF;");
     }
+    boardBtn->setEnabled(true);
+    tinyISPBtn->setEnabled(true);
+    usb2ttlBtn->setEnabled(true);
+    ui->comboBox->setEnabled(true);
+    ui->comboBox->setStyleSheet("color: #FFFFFF;");
     avrType = "atmega328p";
     flashType = "m328p";
+
 }
+
+void MainWindow::set_USB2TTL(){
+    board_set_flag = 1;
+    boardNum = 1;
+    if(board_set_flag && MCU_set_flag) {
+        ui->btnCompile->setEnabled(true);
+        ui->btnCompile->setStyleSheet("color: #FFFFFF;");
+    }
+    ui->comboBox->setEnabled(false);
+    ui->comboBox->setStyleSheet("color: #666666;");
+    boardName = "stk500";
+    cpu_clock = "16000000";
+}
+
+void MainWindow::set_USBtinyISP(){
+    board_set_flag = 1;
+    boardNum = 2;
+    if(board_set_flag && MCU_set_flag) {
+        ui->btnCompile->setEnabled(true);
+        ui->btnCompile->setStyleSheet("color: #FFFFFF;");
+    }
+    ui->comboBox->setEnabled(false);
+    ui->comboBox->setStyleSheet("color: #666666;");
+    boardName = "usbtiny";
+    cpu_clock = "16000000";
+
+}
+
 
 void MainWindow::set_boardAsArduino(){
     board_set_flag = 1;
+    boardNum = 3;
     if(board_set_flag && MCU_set_flag) {
         ui->btnCompile->setEnabled(true);
         ui->btnCompile->setStyleSheet("color: #FFFFFF;");
@@ -200,14 +246,36 @@ void MainWindow::on_btnFlash_clicked(){
     ui->textBrowser->clear();
     ui->textBrowser->append("Uploading Firmware...");
     command = "avrdude";
+
+
+    if(boardNum == 0 ){
+         ui->textBrowser->append("Please select board before");
+         return;
+    }
+
+    if(boardNum == 1){
+        ui->textBrowser->append("USB to TTL isn't supported");
+        return;
+    }
+
+    if(boardNum == 2){
+        arguments.clear();
+        QString arg = ("-p attiny2313 -c "+boardName+" -F -U flash:w:"+fileName+".flash.hex:i").c_str();
+        arguments << arg.split(" ");
+        flashCommand(command, arguments);
+    }
+
+    if(boardNum == 3){
+        arguments.clear();
+        QString arg = ("-p "+avrType+" -P /dev/"+ui->comboBox->currentText().toStdString()+" -c "+boardName+" -U flash:w:"+fileName+".flash.hex:i").c_str();
+        arguments << arg.split(" ");
+        flashCommand(command, arguments);
+    }
+
     arguments.clear();
-    QString arg = ("-p "+avrType+" -P /dev/"+ui->comboBox->currentText().toStdString()+" -c "+boardName+" -U flash:w:"+fileName+".flash.hex:i").c_str();
-    arguments << arg.split(" ");
-
-    flashCommand(command, arguments);
-
-    arguments.clear();
-
+    ui->comboBox->setEnabled(true);
+    fillPortsInfo();
+    ui->comboBox->setStyleSheet("color: #FFFFFF;");
 
 }
 
@@ -251,7 +319,7 @@ void MainWindow::on_btnCompile_clicked(){
 
 
         command = "rm";
-        QString arg = (fileName+".elf "+fileName+".eeprom.hex "+fileName+"fuses.hex "+fileName+".flash.hex "+fileName+".o").c_str();
+        QString arg = (fileName+".elf "+fileName+".eeprom.hex "+fileName+".fuses.hex "+fileName+".flash.hex "+fileName+".o").c_str();
         arguments.clear();
         arguments << arg.split(" ");
         consoleCommand(command,arguments);
@@ -315,10 +383,4 @@ MainWindow::~MainWindow()
 
 
 
-
-
-void MainWindow::on_serialMbtn_clicked()
-{
-
-}
 

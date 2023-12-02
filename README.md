@@ -1,9 +1,12 @@
 # AVR_Linux_Compiler
 
-## How to use 
-  <a>
-    sudo apt install qtcreater <br>
-  </a>
- <a>
-   ./avr_linux_compiler
- </a>
+## How to install
+
+
+    $ make avr_linux_compiler
+    $ sudo apt install qtcreator  
+## How to run
+    $ ./avr_linux_compiler
+
+
+ 

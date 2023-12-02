@@ -33,8 +33,11 @@ public:
     QByteArray ba;
     QMenu *pGraphMenu;
     QToolBar *ToolBar;
+    QAction *stm32Btn;
     QAction *fileBtn;
     QAction *boardBtn;
+    QAction *tinyISPBtn;
+    QAction *usb2ttlBtn;
     std::string fileName;
     QAction *openBtn;
     QString c_file;
@@ -49,6 +52,7 @@ public:
     QProcess *process;
     QStringList arguments;
     QString command;
+    int boardNum = 0;
     void breakFlag();
     bool flag = 0;
     void menuToolbarCreate();
@@ -71,9 +75,10 @@ private:
 private slots:
     void handleError(QSerialPort::SerialPortError error);
     void set_boardAsArduino();
+    void set_USB2TTL();
     void on_btnFlash_clicked();
     void on_btnCompile_clicked();
     void set_MCU();
-    void on_serialMbtn_clicked();
+    void set_USBtinyISP();
 };
 #endif // MAINWINDOW_H
