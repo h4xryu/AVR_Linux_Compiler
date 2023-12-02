@@ -12,6 +12,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
     , m_serialPort(new QSerialPort(this))
 {
+    process = new QProcess(this);
     ui->setupUi(this);
     this->setWindowTitle("Linux AVR Compiler");
     this->setStyleSheet("background-color: #233039;");
@@ -34,11 +35,12 @@ MainWindow::MainWindow(QWidget *parent)
     usb2ttlBtn->setEnabled(false);
     connect(ui->btnFlash, SIGNAL(clicked),this, SLOT(on_btnFlash_clicked));
     connect(ui->btnCompile, SIGNAL(clicked),this , SLOT(on_btnCompile_clicked));
+    connect(terminalBtn, SIGNAL(triggered()),this , SLOT(termButton_clicked()));
     connect(fileBtn, SIGNAL(triggered()), this, SLOT(set_MCU()));
-
     connect(boardBtn, SIGNAL(triggered()), this, SLOT(set_boardAsArduino()));
     connect(tinyISPBtn, SIGNAL(triggered()), this, SLOT(set_USBtinyISP()));
     connect(usb2ttlBtn, SIGNAL(triggered()), this, SLOT(set_USB2TTL()));
+    connect(openBtn, SIGNAL(triggered()), this, SLOT(on_openFile_clicked()));
 
     ui->textBrowser->append("Simple Linux AVR Compiler v1.0");
     ui->textBrowser->append("Select a MCU first.");
@@ -48,7 +50,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 void MainWindow::openConsole(std::string currentPath){
 
-    process = new QProcess(this);
+
     QString cmd = "ls";
     QStringList args;
     args << QString::fromStdString(currentPath);
@@ -155,21 +157,29 @@ void MainWindow::menuToolbarCreate()
 {
 
     // 메뉴바에 도형 메뉴 추가작
+        pOpenMenu = menuBar()->addMenu(tr("&Open c file"));
         pGraphMenu = menuBar()->addMenu(tr("&Select MCU"));
+
         ToolBar = addToolBar(tr("Select Board"));
         ToolBar->setStyleSheet("color: #FFFFFF;");
         // 아이콘 설정
-        fileBtn = new QAction(tr("&atmega328p"), this);
+        fileBtn = new QAction(tr("&Atmega328p"), this);
         stm32Btn = new QAction(tr("&STM32"), this);
+
+        openBtn = new QAction(tr("&Open file"), this);
+
         boardBtn = new QAction(tr("&Arduino"), this);
         tinyISPBtn = new QAction(tr("&USBtinyISP"), this);
         usb2ttlBtn = new QAction(tr("&USB2TTL"), this);
+        terminalBtn = new QAction(tr("&Terminal"), this);
         // 메뉴바에 "그래프 시작 추가
         pGraphMenu->addAction(fileBtn);
         pGraphMenu->addAction(stm32Btn);
+        pOpenMenu->addAction(openBtn);
         ToolBar->addAction(boardBtn);
         ToolBar->addAction(tinyISPBtn);
         ToolBar->addAction(usb2ttlBtn);
+        ToolBar->addAction(terminalBtn);
 
 }
 
@@ -287,10 +297,14 @@ void MainWindow::on_btnFlash_clicked(){
 
 }
 
+void MainWindow::on_openFile_clicked(){
+    c_file = QFileDialog::getOpenFileName(this, "Select a C file", "./","*.c");
+}
+
 void MainWindow::on_btnCompile_clicked(){
     ui->textBrowser->clear();
     fillPortsInfo();
-    c_file = QFileDialog::getOpenFileName(this, "Select a C file", "./","*.c");
+    if(c_file == NULL) c_file = QFileDialog::getOpenFileName(this, "Select a C file", "./","*.c");
 
 
     if(c_file != NULL){
@@ -330,7 +344,7 @@ void MainWindow::on_btnCompile_clicked(){
         QString arg = (fileName+".elf "+fileName+".eeprom.hex "+fileName+".fuses.hex "+fileName+".flash.hex "+fileName+".o").c_str();
         arguments.clear();
         arguments << arg.split(" ");
-        consoleCommand(command,arguments);
+        noprintCommand(command,arguments);
 
 
         command = "avr-gcc";
@@ -381,13 +395,26 @@ void MainWindow::on_btnCompile_clicked(){
         ui->btnFlash->setEnabled(true);
         ui->btnFlash->setStyleSheet("color: #FFFFFF;");
     }
+    //connect(openBtn, SIGNAL(triggered()), this, SLOT(on_openFile_clicked()));
 
 }
+
+void MainWindow::termButton_clicked()
+{
+    QStringList s;
+    //s << ("screen -S 20181657 /dev/"+ui->comboBox->currentText().toStdString()+">> ./log.txt").c_str();
+
+    flashCommand("tilda", s);
+
+}
+
 
 MainWindow::~MainWindow()
 {
     delete ui;
 }
+
+
 
 
 

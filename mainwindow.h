@@ -32,12 +32,14 @@ public:
     QQueue<QVector<double>> data;
     QByteArray ba;
     QMenu *pGraphMenu;
+    QMenu *pOpenMenu;
     QToolBar *ToolBar;
     QAction *stm32Btn;
     QAction *fileBtn;
     QAction *boardBtn;
     QAction *tinyISPBtn;
     QAction *usb2ttlBtn;
+    QAction *terminalBtn;
     std::string fileName;
     QAction *openBtn;
     QString c_file;
@@ -74,11 +76,14 @@ private:
     QSerialPort* m_serialPort = nullptr;
 private slots:
     void handleError(QSerialPort::SerialPortError error);
+    void termButton_clicked();
     void set_boardAsArduino();
     void set_USB2TTL();
     void on_btnFlash_clicked();
     void on_btnCompile_clicked();
     void set_MCU();
     void set_USBtinyISP();
+    void on_openFile_clicked();
+
 };
 #endif // MAINWINDOW_H
