@@ -13,11 +13,9 @@ serialport
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
-    qprocessoutputcapturer.cpp
 
 HEADERS += \
     mainwindow.h \
-    qprocessoutputcapturer.h
 
 FORMS += \
     mainwindow.ui
