@@ -39,6 +39,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect(boardBtn, SIGNAL(triggered()), this, SLOT(set_boardAsArduino()));
     connect(tinyISPBtn, SIGNAL(triggered()), this, SLOT(set_USBtinyISP()));
     connect(usb2ttlBtn, SIGNAL(triggered()), this, SLOT(set_USB2TTL()));
+
+    ui->textBrowser->append("Simple Linux AVR Compiler v1.0");
+    ui->textBrowser->append("Select a MCU first.");
+
+
 }
 
 void MainWindow::openConsole(std::string currentPath){
@@ -150,7 +155,7 @@ void MainWindow::menuToolbarCreate()
 {
 
     // 메뉴바에 도형 메뉴 추가작
-        pGraphMenu = menuBar()->addMenu(tr("&Select Board"));
+        pGraphMenu = menuBar()->addMenu(tr("&Select MCU"));
         ToolBar = addToolBar(tr("Select Board"));
         ToolBar->setStyleSheet("color: #FFFFFF;");
         // 아이콘 설정
@@ -182,6 +187,9 @@ void MainWindow::set_MCU(){
     ui->comboBox->setStyleSheet("color: #FFFFFF;");
     avrType = "atmega328p";
     flashType = "m328p";
+
+    ui->textBrowser->clear();
+    ui->textBrowser->append("Select avrdude programmer_type. (Arduino, ISP...)");
 
 }
 
